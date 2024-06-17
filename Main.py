@@ -1,4 +1,11 @@
+import numpy as np
+from dataclasses import dataclass
+from abc import ABCMeta, abstractmethod, ABC
+import Recomanador
+import Loader
 
+fitxer1 = 'movies.csv'
+fitxer2 = 'ratings.csv'
 def mostrar_menu():
     print("Bienvenido al menu")
     print("Elige el set de datos a ser utilizado:")
@@ -13,35 +20,22 @@ def mostrar_menu():
 
     return setdatos, sistema
 
-def recomend(sistema,fitxer1, fitxer2):
-    
-    if sistema == "1":
-        reco = Recomanacio_Simple()
-    else :
-        reco = Recomanacio_Colaborativa()
-
-    reco.dades_pelicula(fitxer1)
-    reco.dades_ratings(fitxer2)
-    reco.calcula_mitjanes()
 
 def main():
     datos, sistema= mostrar_menu()
     
-    if datos == "1":
-        fitxers = fitxer1, fitxer2
-    elif datos == "2":
-        fitxers = fitxer1, fitxer2
-    else:
-        #Error
-        pass
+    loader = Loader.Loader()
+    df_productes = loader.load(fitxer1)
+    print(df_productes)
+
+    df_ratings = loader.load(fitxer2)
+    print(df_ratings)
 
     if sistema == "1":
-        recomend(sistema,fitxer1, fitxer2)
-    elif sistema == "2":
-        pass
-    else:
-        # Error
-        pass
+        recomanador = Recomanador.Recomanacio_Simple(df_productes, df_ratings)
+        recomanador.calcula_mitjanes()
+        recomanador.calcula_score()
+        recomanador.mitjanas_global()
 
 
 if __name__ == "__main__":

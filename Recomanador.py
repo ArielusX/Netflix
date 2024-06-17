@@ -14,9 +14,10 @@ class Recomanacio(ABC):
     Clase abstracta para recomanaciones.
     """
 
-    def __init__(self):
-        self.productes = np.array([])
-        self.ratings = np.array([])
+    def __init__(self, df_producte, df_ratings):
+        super().__init__()
+        self.producte = df_producte
+        self.ratings = df_ratings
 
     @abstractmethod
     def obtenir_valoracio(self, tipus, usuaris):
@@ -40,12 +41,17 @@ class Recomanacio_Simple(Recomanacio):
     Clase de recomanación simple.
     """
 
-    def __init__(self):
+    def __init__(self, df_producte, df_ratings):
         super().__init__()
         self.mitjanes = np.array([])
         self.score = np.array([])
         self.min_vots = 3
         self.mitjana = 0
+        self.producte = df_producte
+        self.ratings = df_ratings
+
+
+    
 
     def obtenir_valoracio(self, tipus, usuaris):
         pass
@@ -97,7 +103,7 @@ class Recomanacio_Colaborativa(Recomanacio):
     def obtenir_valoracio(self, usuaris):
         similaritats = {}
         for user_id, ratings in usuaris.items():
-            similarity = self.cosine_similarity(usuaris[tipus], ratings)
+            similarity = self.cosine_similarity(usuaris[0], ratings)
             similaritats[user_id] = similarity
 
         return sorted(similaritats.items(), key=lambda x: x[1], reverse=True)

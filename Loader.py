@@ -14,11 +14,10 @@ class Loader:
     """
     _name: str
 
-    def __init__(self, name: str):
-        self._name = name
+    def __init__(self):
+        pass
 
-    def load(self):
-        # self._productes.update({str(cont):Joc(cont, joc[0], joc[2].split('|'), joc[1])})
-        df = pd.read_csv(f"{self._name}.csv")
-        print(df)
+    def load(self, name: str):
+        #df = pd.read_csv(f"{name}.csv")
+        df = pd.read_csv(f"{name}")
         return df
