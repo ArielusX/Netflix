@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from abc import ABCMeta, abstractmethod, ABC
 import math
 import pandas as pd
+import Producte
 class Recomanacio(ABC):
     """
     Clase abstracta para recomanaciones.
@@ -17,7 +18,7 @@ class Recomanacio(ABC):
 
     def __init__(self, df_producte, df_ratings):
         super().__init__()
-        self.producte = df_producte
+        self.producte = df_producte.head(5000)
         self.ratings = df_ratings.head(5000)
 
     @abstractmethod
@@ -102,8 +103,32 @@ class Recomanacio_Colaborativa(Recomanacio):
 
     def __init__(self, df_producte, df_ratings, usuaris):
         super().__init__(df_producte, df_ratings)
-        self.usuaris =  usuaris
+        self.usuaris =  usuaris[:100]
 
+    def mitja_usuari(self, usuari):
+        ratings_values = list(usuari.ratings.values()) 
+        return np.mean(ratings_values)
+
+    def puntuacio_final(self, usuari, similaritats):
+        mitja = self.mitja_usuari(usuari)
+
+        den = 0
+        div = sum(similaritats.values())
+
+        resultados = []
+
+        for user in self.usuaris:
+            if user.id != usuari.id: 
+                for _, row in self.producte.iterrows():
+                    if row["id"] in user.ratings:
+                        rating_product = user.ratings[int(row["id"])]
+                        calc = similaritats[user.id]*(rating_product-self.mitja_usuari(user))
+                        den = den + calc
+                        resultado = mitja+ (den/div)
+                        resultados.append({"product_id": row["id"], "score": resultado})
+
+                    
+        return resultados
     def obtenir_valoracio(self, usuari_id):
         similaritats = {}
 
@@ -117,16 +142,17 @@ class Recomanacio_Colaborativa(Recomanacio):
                 similarity = self.cosine_similarity(usuari, user)
                 similaritats[user.id] = similarity
 
-        puntuaciones = puntuacio_final(usuari, similaritats)
+        puntuaciones = self.puntuacio_final(usuari, similaritats)
 
-        top_5_df = puntuaciones.head(5)
+        puntuaciones_sorted = sorted(puntuaciones, key=lambda x: x['score'], reverse=True)
+
+        top_5 = puntuaciones_sorted[:5]
 
         print(f"Las películas recomendadas para el usuario {usuari_id} son:")
-        for _, row in top_5_df.iterrows():
-            print(f"\t{row['product_id']} (Score: {row['score']:.2f})")
-        
-        return top_5_df['product_id'].tolist()
+        for item in top_5:
+            print(f"\t{item['product_id']} (Score: {item['score']:.2f})")
 
+        return [item['product_id'] for item in top_5]
 
     def obtenir_valoracio_deprecated(self, usuari):
         similaritats = {}
@@ -162,25 +188,7 @@ class Recomanacio_Colaborativa(Recomanacio):
         similarity = dot_product / (mag_user1 * mag_user2)
         return similarity
     
-    def mitja_usuari(self, usuari):
-        return usuari.rating.values().mean()
 
-    def puntuacio_final(self, usuari, similaritats):
-        mitja = mitja_usuari(usuari)
-
-        den = 0
-
-        for user in self.usuaris:
-            if user.id != usuari.id: 
-                for product in self.product:
-                    rating_product = user.rating[product["id"]]
-                    calc = similaritats[user.id]*rating_product-mitja_usuari(user)
-                    den = den + calc
-                    
-        div = similaritats.values().sum()
-
-        resultado = mitja+ (den/div)
-        return resultado
         
 
     
