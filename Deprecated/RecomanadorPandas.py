@@ -107,15 +107,8 @@ class Recomanacio_Colaborativa(Recomanacio):
 
     def obtenir_valoracio(self, usuari):
         similaritats = {}
-        
-        user_ratings = self.ratings[self.ratings['user_id'] == usuari].set_index('user_id').squeeze()
-
-        for index, row in self.usuaris.iterrows():
-            user_id = row['user_id']
-            if user_id == usuari:
-                continue  
-            user_compare = self.ratings[self.ratings['user_id'] == user_id]
-            similarity = self.cosine_similarity(user_ratings, user_compare)
+        for user_id, ratings in self.usuaris.items():
+            similarity = self.cosine_similarity(self.usuaris[usuari], ratings)
             similaritats[user_id] = similarity
 
         return sorted(similaritats.items(), key=lambda x: x[1], reverse=True)
@@ -134,3 +127,4 @@ class Recomanacio_Colaborativa(Recomanacio):
         
         similarity = dot / (mag_user1 * mag_user2)
         return similarity
+    

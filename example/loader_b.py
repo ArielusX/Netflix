@@ -5,7 +5,7 @@ Created on Fri Jun 17 21:05:54 2022
 @author: User
 """
 from dataclasses import dataclass
-from usuari import Usuari
+from example.usuari import Usuari
 from pellicula import Pellicula
 from joc import Joc
 from typing import Dict

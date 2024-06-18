@@ -1,97 +1,90 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jun 17 21:05:54 2022
-
-@author: User
-"""
-
-from dataclasses import dataclass
 import pandas as pd
 
-@dataclass
 class Loader:
     """
-    Clase para cargar datos de un archivo CSV.
+    Clase base para cargar datos de un archivo CSV.
     """
-    def __init__(self, _name=None):
-        self._name = _name
-
-    def load(self, name: str):
+    
+    def load(self, name: str) -> pd.DataFrame:
         """
-        Load a CSV file 
+        Cargar un archivo CSV.
         """
         df = pd.read_csv(name)
         return df
 
 
+class UsersLoader(Loader):
+    """
+    Clase para cargar usuarios desde un archivo CSV.
+    """
+    
     def load_users(self, name: str) -> pd.DataFrame:
         """
-        Load the users CSV file.
+        Cargar el archivo CSV de usuarios.
         """
-        df = self.load(name)  
-
+        df = self.load(name)
+        
         column_mapping = {
             'user_id': ['userId', 'User-ID'],
             'location': ['Location'],
             'age': ['Age']
         }
-
+        
         for standard_name, possible_names in column_mapping.items():
             for possible_name in possible_names:
                 if possible_name in df.columns:
                     df = df.rename(columns={possible_name: standard_name})
                     break
-        '''
-        def afegeix_usuari (self,usuari): #usuari de la classe Usuari
-            if (usuari not in self._ll_usuaris):
-                self._ll_usuaris[usuari]=Usuari(usuari)
-            else:
-                print("L'usuari ja està dins del conjunt")'''
+        
+        return df[['user_id', 'location', 'age']]
 
-        return df[["user_id","location","age"]]
 
-    #Forma simple
+class RatingsLoader(Loader):
+    """
+    Clase para cargar ratings desde un archivo CSV.
+    """
+    
     def load_ratings(self, name: str) -> pd.DataFrame:
         """
-        Load the ratings CSV file.
+        Cargar el archivo CSV de ratings.
         """
-        df = self.load(name)  
-
+        df = self.load(name)
+        
         column_mapping = {
             'user_id': ['userId', 'User-ID'],
             'product_id': ['movieId', 'ISBN'],
             'rating': ['rating', 'Book-Rating']
         }
-
+        
         for standard_name, possible_names in column_mapping.items():
             for possible_name in possible_names:
                 if possible_name in df.columns:
                     df = df.rename(columns={possible_name: standard_name})
                     break
-                
-        return df[["user_id","product_id","rating"]]
+        
+        return df[['user_id', 'product_id', 'rating']]
 
+
+class ProductsLoader(Loader):
+    """
+    Clase para cargar productos desde un archivo CSV.
+    """
+    
     def load_products(self, name: str) -> pd.DataFrame:
         """
-        Load the products CSV file.
+        Cargar el archivo CSV de productos.
         """
         df = self.load(name)
-
+        
         column_mapping = {
             'id': ['ISBN', 'movieId'],
             'name': ['title', 'Book-Title']
         }
-
+        
         for standard_name, possible_names in column_mapping.items():
-            for name in possible_names:
-                if name in df.columns:
-                    df = df.rename(columns={name: standard_name})
+            for possible_name in possible_names:
+                if possible_name in df.columns:
+                    df = df.rename(columns={possible_name: standard_name})
                     break
-
+        
         return df
-'''
-# Example usage
-loader = Loader(_name="example")
-users_df = loader.load_users("path/to/users.csv")
-ratings_df = loader.load_ratings("path/to/ratings.csv")
-products_df = loader.load_products("path/to/products.csv")'''

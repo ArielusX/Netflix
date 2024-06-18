@@ -11,4 +11,3 @@ class Usuari:
     @property
     def id (self):
         return self._id
-
