@@ -32,10 +32,10 @@ class Recomanacio_Simple(Recomanacio):
 
     def __init__(self, df_producte, df_ratings):
         super().__init__(df_producte, df_ratings)
-        self.mitjanes =  self.calcula_mitjanes()
-        self.score = self.calcula_score()
         self.min_vots = 3
+        self.mitjanes =  self.calcula_mitjanes()
         self.mitjana = self.mitjanes_global()
+        self.score = self.calcula_score()
 
     def obtenir_valoracio(self, usuari):
 
