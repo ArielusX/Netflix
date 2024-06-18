@@ -19,6 +19,7 @@ def mostrar_menu():
     print("Elige el set de datos a ser utilizado:")
     print("\t 1. Sistema de recomendación simple")
     print("\t 2. Sistema de recomendación colaborativo")
+    print("\t 3. Sistema de recomendación por contenido")
     sistema = input("Selecciona una opcion: ")
 
     return setdatos, sistema
@@ -44,7 +45,14 @@ def main():
     if sistema == "2":
         recomanador = Recomanador.Recomanacio_Colaborativa(df_productes, df_ratings, users)
         recomanador.obtenir_valoracio(2)
-
+        
+    if sistema == "3":
+        recomanador = Recomanador.Recomanacio_Contingut(df_productes, df_ratings)
+        if datos == 1:
+            item = "pelicula"
+        else:
+            item = "llibre"
+        recomanador.obtenir_valoracio(2, users, item)
 
 if __name__ == "__main__":
     main()
