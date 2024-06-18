@@ -11,6 +11,7 @@ from abc import ABCMeta, abstractmethod, ABC
 import math
 import pandas as pd
 import Producte
+from sklearn.feature_extraction.text import TfidfVectorizer
 class Recomanacio(ABC):
     """
     Clase abstracta para recomanaciones.
@@ -208,3 +209,92 @@ class Recomanacio_Colaborativa(Recomanacio):
 
         similarity = dot_product / (mag_user1 * mag_user2)
         return similarity
+    
+@dataclass
+class Recomanacio_Contingut(Recomanacio):
+    
+    def __init__(self, df_producte, df_ratings):
+        super().__init__(df_producte, df_ratings)
+        self.item_features = None
+        self._perfil={}
+        self._distancies={}
+        
+    def get_item_features(self, tipo):
+        item_features = []
+        if tipo == "pelicula":
+            for index, row in self.producte.iterrows():
+                generos = row['genres'].split('|')
+                item_features.append(generos)
+        
+        else:
+            for index, row in self.producte.iterrows():
+                autor = row['Book-Author']
+                item_features.append([autor])
+        return item_features
+            
+    def get_tfidf_matrix(self, item):
+        item_features=self.get_item_features(item)
+        tfidf = TfidfVectorizer(stop_words='english')
+        tfidf_matrix = tfidf.fit_transform(item_features).toarray()
+        return tfidf_matrix
+    
+    def pelicules_ordenades(self, user_id: int):
+        ratings_dict = {}
+        for product in self.ratings:
+            if product.userId == user_id:
+                ratings_dict[product.movieId] = product.rating
+    
+        return ratings_dict
+    
+    def llibres_ordenats(self, user_id: int) -> dict:
+        ratings_dict = {}
+        for product in self.ratings:
+            if product.userId == user_id:
+                ratings_dict[product.ISBN] = product['Book-Rating']
+    
+        return ratings_dict
+    
+    
+    def get_perfil_usuari(self, matriu, ratings):
+        sumatori1 = 0.0
+        sumatori2 = 0.0
+        for element in ratings:
+            sumatori1 += float(ratings[element]) * matriu[int(ratings.index(element))]
+            sumatori2+= float(ratings[element])
+        return sumatori1/sumatori2
+    
+    def distancia(self, ratings, matriu, element):
+        sumatori1=0.0
+        sumatori2=0.0
+        sumatori3=0.0
+        for n, score in enumerate(self._perfil):
+            sumatori1 += score * matriu[int(ratings.index(element))][n]
+            sumatori2 += score ** 2
+            sumatori3 += (matriu[int(ratings.index(element))][n])**2
+        return sumatori1/(math.sqrt(sumatori2)*math.sqrt(sumatori3))
+    
+    def obtenir_valoracio(self, usuari, llista_usuaris, item):
+        tfidf = self.get_tfidf_matrix(item)
+        if item == 'pelicula':
+            pelicules_ordenades = self.pelicules_ordenades(usuari.userId)
+            self._perfil = self.get_perfil_usuari(tfidf, pelicules_ordenades)
+            valoracio_factor = 5
+            elements = self.df_producte.set_index('movieId').to_dict('index')
+        else:
+            llibres_ordenats = self.llibres_ordenats(usuari.userId)
+            self._perfil = self.get_perfil_usuari(tfidf, llibres_ordenats)
+            valoracio_factor = 10
+            elements = self.df_producte.set_index('ISBN').to_dict('index')
+
+        for element in elements:
+            self._distancies[element] = self.distancia(usuari, tfidf, element)
+            self._distancies[element] *= valoracio_factor
+
+        llista_recomanacions = sorted(self._distancies.values(), reverse=True)
+        recomanacions = []
+        for valoracio in llista_recomanacions:
+            for element, val in self._distancies.items():
+                if val == valoracio and elements[element]['title'] not in [x['title'] for x in recomanacions] and val != 0:
+                    recomanacions.append(elements[element])
+        
+        return recomanacions
