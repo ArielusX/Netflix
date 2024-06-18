@@ -27,14 +27,14 @@ class Producte:
         return self._titol
 
     def __str__(self):
-        return f"Dades del Producte:\nID: {self.id}\tTitol: {self.titol}\tGeneres: {', '.join(self.genres)}"
+        return f"Dades del Producte:\nID: {self.id}\tTitol: {self.titol}"
 
 
 @dataclass
 class Llibre(Producte):
     #Book-Author,Year-Of-Publication,Publisher
     def __str__(self):
-        return f"Dades del Llibre:\nID: {self.id}\tTitol: {self.titol}\tGeneres: {', '.join(self.genres)}"
+        return f"Dades del Llibre:\nID: {self.id}\tTitol: {self.titol}"
 
 
 @dataclass
