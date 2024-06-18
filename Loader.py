@@ -46,7 +46,7 @@ class Loader:
 
         usuaris = []
         for _, row in df.iterrows():
-            user = Usuari(row['user_id'], row['location'], row['age'])
+            user = Usuari.Usuari(row['user_id'], row['location'], row['age'])
             usuaris.append(user)
 
         return usuaris
@@ -92,8 +92,7 @@ class Loader:
 
         ratings_df = df[["user_id", "product_id", "rating"]]
         
-        # Crear un diccionario de usuarios para acceso rápido
-        user_dict = {user.user_id: user for user in usuaris}
+        user_dict = {user.id: user for user in usuaris}
         
         for _, row in ratings_df.iterrows():
             user_id = row['user_id']
@@ -101,6 +100,8 @@ class Loader:
             rating = row['rating']
             if user_id in user_dict:
                 user_dict[user_id].add_rating(product_id, rating)
+        
+        return df
 
     def load_products(self, name: str) -> pd.DataFrame:
         """

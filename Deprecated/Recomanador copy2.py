@@ -117,17 +117,8 @@ class Recomanacio_Colaborativa(Recomanacio):
                 similarity = self.cosine_similarity(usuari, user)
                 similaritats[user.id] = similarity
 
-        puntuaciones = puntuacio_final(usuari, similaritats)
-
-        top_5_df = puntuaciones.head(5)
-
-        print(f"Las películas recomendadas para el usuario {usuari_id} son:")
-        for _, row in top_5_df.iterrows():
-            print(f"\t{row['product_id']} (Score: {row['score']:.2f})")
-        
-        return top_5_df['product_id'].tolist()
-
-
+        return sorted(similaritats.items(), key=lambda x: x[1], reverse=True)
+    
     def obtenir_valoracio_deprecated(self, usuari):
         similaritats = {}
         
@@ -151,45 +142,8 @@ class Recomanacio_Colaborativa(Recomanacio):
 
         if not common_product_ids:
             return 0
-
-        dot_product = sum(user1.ratings[pid] * user2.ratings[pid] for pid in common_product_ids)
-        mag_user1 = math.sqrt(sum(rating ** 2 for rating in user1.ratings.values()))
-        mag_user2 = math.sqrt(sum(rating ** 2 for rating in user2.ratings.values()))
-
-        if mag_user1 == 0 or mag_user2 == 0:
-            return 0
-
-        similarity = dot_product / (mag_user1 * mag_user2)
-        return similarity
-    
-    def mitja_usuari(self, usuari):
-        return usuari.rating.values().mean()
-
-    def puntuacio_final(self, usuari, similaritats):
-        mitja = mitja_usuari(usuari)
-
-        den = 0
-
-        for user in self.usuaris:
-            if user.id != usuari.id: 
-                for product in self.product:
-                    rating_product = user.rating[product["id"]]
-                    calc = similaritats[user.id]*rating_product-mitja_usuari(user)
-                    den = den + calc
-                    
-        div = similaritats.values().sum()
-
-        resultado = mitja+ (den/div)
-        return resultado
         
-
-    
-    def puntuacio_producte(self, user1, user2):
-
-        common_product_ids = set(user1.ratings.keys()).intersection(set(user2.ratings.keys()))
-
-        if not common_product_ids:
-            return 0
+        print(common_product_ids)
 
         dot_product = sum(user1.ratings[pid] * user2.ratings[pid] for pid in common_product_ids)
         mag_user1 = math.sqrt(sum(rating ** 2 for rating in user1.ratings.values()))

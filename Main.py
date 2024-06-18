@@ -28,19 +28,19 @@ def main():
     
     loader = Loader.Loader()
 
+    users = df_users = loader.load_users(fitxer5)
     if datos == "1":
         df_productes = loader.load_products(fitxer1)
-        df_ratings = loader.load_ratings(fitxer2)
+        df_ratings = loader.load_ratings_pro(fitxer2, users)
     else: 
         df_productes = loader.load_products(fitxer3)
-        df_ratings = loader.load_ratings(fitxer4)
+        df_ratings = loader.load_ratings_pro(fitxer4, users)
 
     if sistema == "1":
         recomanador = Recomanador.Recomanacio_Simple(df_productes, df_ratings)
         recomanador.obtenir_valoracio(2)
 
     if sistema == "2":
-        df_users = loader.load_users(fitxer5)
         recomanador = Recomanador.Recomanacio_Colaborativa(df_productes, df_ratings, df_users)
         recomanador.obtenir_valoracio(2)
 
