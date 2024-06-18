@@ -63,8 +63,7 @@ class Recomanacio_Simple(Recomanacio):
 
     def calcula_mitjanes(self):
      
-        self.mitjana_global = self.ratings['rating'].mean()
-        
+
         mitjanes_per_item = []
         for producte in self.ratings['product_id'].unique():
             ratings = self.ratings[self.ratings['product_id'] == producte]['rating']
@@ -108,8 +107,10 @@ class Recomanacio_Colaborativa(Recomanacio):
     def obtenir_valoracio(self, usuari):
         similaritats = {}
         
-        user_ratings = self.ratings[self.ratings['user_id'] == usuari].set_index('user_id').squeeze()
+        user_ratings = self.ratings[self.ratings['user_id'] == usuari]
+        #.set_index('user_id').squeeze()
 
+        print(user_ratings)
         for index, row in self.usuaris.iterrows():
             user_id = row['user_id']
             if user_id == usuari:
@@ -121,16 +122,20 @@ class Recomanacio_Colaborativa(Recomanacio):
         return sorted(similaritats.items(), key=lambda x: x[1], reverse=True)
 
     def cosine_similarity(self, user1, user2):
-        user1_series = pd.Series(user1)
-        user2_series = pd.Series(user2)
+        #Obtener productos que ambos han valorado
+        common_product_ids = pd.merge(user1, user2, on='product_id', suffixes=('_user1', '_user2'))
 
-        common_items = user1_series.index.intersection(user2_series.index)
-        if len(common_items) == 0:
+        print(common_product_ids)
+
+        
+        if len(common_product_ids) == 0:
             return 0
+        
+        print(user1[common_product_ids])
 
-        dot = (user1_series[common_items] * user2_series[common_items]).sum()
-        mag_user1 = math.sqrt((user1_series ** 2).sum())
-        mag_user2 = math.sqrt((user2_series ** 2).sum())
+        dot = (common_product_ids[common_product_ids]['rating'] * user2[common_product_ids]['rating']).sum()
+        mag_user1 = math.sqrt((user1[common_product_ids]['rating'] ** 2).sum())
+        mag_user2 = math.sqrt((user2[common_product_ids]['rating'] ** 2).sum())
         
         similarity = dot / (mag_user1 * mag_user2)
         return similarity

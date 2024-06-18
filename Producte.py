@@ -14,13 +14,13 @@ from dataclasses import dataclass, field
 @dataclass
 class Producte:
 
-    _ids: int
+    _id: int
     _titol: str
     _rating:Dict=field(default_factory=dict)
     
     @property
-    def idg (self):
-        return self._ids
+    def id (self):
+        return self._id
 
     @property
     def titol(self):
@@ -30,10 +30,9 @@ class Producte:
     def rating(self):
         return self._rating
 
-
     @id.setter
-    def ids (self, ids):
-        self._ids = ids
+    def ids (self, id):
+        self._id = id
     
     @titol.setter
     def titols (self,titol):
